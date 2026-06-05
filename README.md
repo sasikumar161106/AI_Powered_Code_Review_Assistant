@@ -1,2 +1,93 @@
-# AI_Powered_Code_Review_Assistant
-An AI agent that integrates with GitHub/GitLab, reviews pull requests in real-time, detects potential bugs, security vulnerabilities, code smells, and performance bottlenecks, then generates actionable review comments automatically.
+# AI-Powered Code Review Assistant
+
+An AI agent that integrates with GitHub, reviews pull requests in real-time, detects potential bugs, security vulnerabilities, code smells, and performance bottlenecks, and then generates actionable inline review comments automatically.
+
+## 🚀 Features
+
+- **Real-time Automated Reviews:** Listens to GitHub webhooks (`pull_request` events) to review code as soon as a PR is opened or updated.
+- **Deep Code Analysis:** Uses **Google Gemini (1.5 Pro)** to analyze git diffs for:
+  - Bugs and Logic Errors
+  - Security Vulnerabilities (OWASP)
+  - Code Smells and Anti-patterns
+  - Performance Bottlenecks
+- **Inline Comments:** Automatically maps AI feedback to specific lines of code in the Pull Request, providing human-like inline reviews.
+- **FastAPI Backend:** Built on Python and FastAPI for blazing fast, asynchronous webhook processing.
+
+## 🛠️ Technology Stack
+
+- **Backend:** Python 3.11, FastAPI, Uvicorn
+- **AI Integration:** Google GenAI SDK (`gemini-1.5-pro`)
+- **GitHub Integration:** PyGithub (GitHub App/PAT Support)
+- **Deployment:** Docker
+
+---
+
+## ⚙️ Setup and Installation
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/sasikumar161106/AI_Powered_Code_Review_Assistant.git
+cd AI_Powered_Code_Review_Assistant
+```
+
+### 2. Configure Environment Variables
+Copy the `.env.example` file to `.env`:
+```bash
+cp .env.example .env
+```
+Fill in the necessary keys in `.env`:
+- `GEMINI_API_KEY`: Get this from [Google AI Studio](https://aistudio.google.com/).
+- `GITHUB_APP_ID`: The ID of your GitHub App.
+- `GITHUB_PRIVATE_KEY_PATH`: Path to your downloaded GitHub App private key (`.pem` file).
+- `GITHUB_WEBHOOK_SECRET`: Optional secret to verify GitHub payloads.
+
+### 3. Run Locally (Using Python)
+Make sure you have Python 3.11+ installed.
+```bash
+# Create a virtual environment
+python -m venv venv
+
+# Activate the virtual environment
+# Windows:
+.\venv\Scripts\activate
+# Linux/Mac:
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start the FastAPI server
+python main.py
+```
+
+### 4. Run Locally (Using Docker)
+If you prefer Docker, you can build and run the application container:
+```bash
+docker build -t ai-code-reviewer .
+docker run -p 8000:8000 --env-file .env ai-code-reviewer
+```
+
+---
+
+## 🔗 Connecting to GitHub (Local Testing)
+
+Since your local server runs on `localhost:8000`, GitHub cannot send webhooks directly to it. You need to expose it using a tunneling tool like **ngrok**.
+
+1. Download and install [ngrok](https://ngrok.com/).
+2. Run ngrok to tunnel port 8000:
+   ```bash
+   ngrok http 8000
+   ```
+3. Copy the public URL provided by ngrok (e.g., `https://1a2b3c.ngrok.app`).
+4. In your GitHub App Settings, set the **Webhook URL** to:
+   ```
+   https://1a2b3c.ngrok.app/api/v1/webhook
+   ```
+
+## 📝 How it Works
+1. A developer opens or updates a Pull Request.
+2. GitHub sends a webhook payload to the `/api/v1/webhook` endpoint.
+3. The app fetches the changed files and parses the git diffs.
+4. The diffs are sent to Google Gemini for analysis based on strict review prompts.
+5. The AI returns structured JSON containing review comments mapped to exact line numbers.
+6. The app uses the GitHub API to post the inline comments on the PR!
