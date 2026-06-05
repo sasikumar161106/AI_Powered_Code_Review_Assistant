@@ -8,14 +8,19 @@ def get_github_client(installation_id: int = None) -> Github:
     if settings.github_pat:
         return Github(settings.github_pat)
     
-    if settings.github_app_id and settings.github_private_key_path:
-        with open(settings.github_private_key_path, "r") as f:
-            private_key = f.read()
+    if settings.github_app_id:
+        private_key = None
+        if settings.github_private_key:
+            private_key = settings.github_private_key.replace('\\n', '\n')
+        elif settings.github_private_key_path:
+            with open(settings.github_private_key_path, "r") as f:
+                private_key = f.read()
         
-        integration = GithubIntegration(settings.github_app_id, private_key)
-        if installation_id:
-            access_token = integration.get_access_token(installation_id).token
-            return Github(access_token)
+        if private_key:
+            integration = GithubIntegration(settings.github_app_id, private_key)
+            if installation_id:
+                access_token = integration.get_access_token(installation_id).token
+                return Github(access_token)
     
     logger.warning("GitHub credentials not configured properly.")
     return None
