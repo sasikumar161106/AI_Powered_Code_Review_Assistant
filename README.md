@@ -1,6 +1,19 @@
+<div align="center">
+  <img src="assets/project_banner.png" alt="AI Code Reviewer Banner" width="100%">
+</div>
+
 # AI-Powered Code Review Assistant
 
+
 An AI agent that integrates with GitHub, reviews pull requests in real-time, detects potential bugs, security vulnerabilities, code smells, and performance bottlenecks, and then generates actionable inline review comments automatically.
+
+## 🎥 Live Demo / Screenshots
+> **Judges / Reviewers:** Watch the AI in action below!
+> 
+> *[Insert a link to your 2-minute demo video here, e.g., YouTube or Loom]*
+>
+> *(Alternatively, drop a screenshot of the AI commenting on a Pull Request here! `![Demo Screenshot](link-to-screenshot)`)*
+
 
 ## 🚀 Features
 
