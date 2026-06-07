@@ -1,3 +1,13 @@
+---
+title: AI Code Review Assistant
+emoji: 🤖
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 <div align="center">
   <img src="assets/project_banner.png" alt="AI Code Reviewer Banner" width="100%">
 </div>
