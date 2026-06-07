@@ -15,13 +15,7 @@ if settings.anthropic_api_key:
     litellm.anthropic_key = settings.anthropic_api_key
 
 def get_model_name():
-    provider = settings.default_llm_provider
-    if provider == "openai":
-        return "gpt-4o"
-    elif provider == "anthropic":
-        return "claude-3-5-sonnet-20240620"
-    else:
-        return "gemini/gemini-pro"
+    return "groq/llama3-8b-8192"
 
 class ReviewCommentModel(BaseModel):
     line_number: int = Field(description="The exact line number in the NEW file where the issue occurs.")
