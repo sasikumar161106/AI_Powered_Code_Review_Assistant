@@ -26,14 +26,20 @@ class ReviewResponseModel(BaseModel):
     comments: list[ReviewCommentModel] = Field(description="List of review comments.")
 
 def generate_json_response(prompt: str, schema_class) -> dict | None:
+    json_prompt = prompt + "\n\nCRITICAL: You MUST respond ONLY with a valid JSON object. The JSON object must have a single key called 'comments' which contains a list of objects. Each object must have 'line_number' (int), 'body' (string), and 'suggestion' (string or null). DO NOT wrap the JSON in markdown blocks like ```json."
     try:
         response = litellm.completion(
             model=get_model_name(),
-            messages=[{"role": "user", "content": prompt}],
-            response_format=schema_class,
+            messages=[{"role": "user", "content": json_prompt}],
+            response_format={"type": "json_object"},
             temperature=0.2
         )
-        return json.loads(response.choices[0].message.content)
+        content = response.choices[0].message.content
+        if content.startswith("```json"):
+            content = content.replace("```json", "").replace("```", "").strip()
+        elif content.startswith("```"):
+            content = content.replace("```", "").strip()
+        return json.loads(content)
     except Exception as e:
         logger.error(f"Error calling LLM: {e}")
         return None
