@@ -20,9 +20,16 @@ An AI agent that integrates with GitHub, reviews pull requests in real-time, det
 ## 🎥 Live Demo / Screenshots
 > **Judges / Reviewers:** Watch the AI in action below!
 > 
-> *[Insert a link to your 2-minute demo video here, e.g., YouTube or Loom]*
->
-> *(Alternatively, drop a screenshot of the AI commenting on a Pull Request here! `![Demo Screenshot](link-to-screenshot)`)*
+> 📹 **[Watch the full Video Demo Here](#)** *(Note: Upload your `ai_code_reviewer_demo.mp4` to YouTube or Google Drive and paste the link here!)*
+
+### Automated PR Summaries & Code Reviews
+![PR Summary Demo](assets/demo_1.png)
+
+### Catching Security Vulnerabilities
+![Security Demo](assets/demo_2.png)
+
+### Generating Inline Fixes
+![Auto-Fix Demo](assets/demo_3.png)
 
 
 ## 🚀 Features
