@@ -18,18 +18,20 @@ An AI agent that integrates with GitHub, reviews pull requests in real-time, det
 ## 🚀 Features
 
 - **Real-time Automated Reviews:** Listens to GitHub webhooks (`pull_request` events) to review code as soon as a PR is opened or updated.
-- **Deep Code Analysis:** Uses **Google Gemini (1.5 Pro)** to analyze git diffs for:
-  - Bugs and Logic Errors
-  - Security Vulnerabilities (OWASP)
-  - Code Smells and Anti-patterns
-  - Performance Bottlenecks
-- **Inline Comments:** Automatically maps AI feedback to specific lines of code in the Pull Request, providing human-like inline reviews.
+- **Deep Code Analysis:** Uses AI to analyze git diffs for bugs, logic errors, security vulnerabilities, code smells, and performance bottlenecks.
+- **One-Click "Suggested Changes" (Auto-Fixes):** Provides direct code fixes using GitHub's `suggestion` syntax, allowing developers to accept fixes with a single click.
+- **Automated PR Summaries & Release Notes:** Generates a high-level summary of what changed, why it matters, and potential impact.
+- **Custom Rules & Configurations (`.code-reviewer.yml`):** Enforce custom coding standards, style guides, or ignoring specific files using a repo-level config file.
+- **Context-Aware Reviewing (RAG):** Fetches the full file content (not just the diff) for deeper, architectural understanding before reviewing.
+- **Automated Test Generation:** Suggests unit tests for newly added or modified code.
+- **Interactive Chat / Q&A:** Tag the bot or reply to its comments on the PR to ask follow-up questions, request clarifications, or discuss design decisions.
+- **Multi-LLM Support:** Built with `litellm` to easily switch between Google Gemini, OpenAI (GPT-4o), and Anthropic (Claude).
 - **FastAPI Backend:** Built on Python and FastAPI for blazing fast, asynchronous webhook processing.
 
 ## 🛠️ Technology Stack
 
 - **Backend:** Python 3.11, FastAPI, Uvicorn
-- **AI Integration:** Google GenAI SDK (`gemini-1.5-pro`)
+- **AI Integration:** LiteLLM (Supports Gemini 1.5 Pro, GPT-4o, Claude 3.5 Sonnet)
 - **GitHub Integration:** PyGithub (GitHub App/PAT Support)
 - **Deployment:** Docker
 

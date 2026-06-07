@@ -1,35 +1,65 @@
 import json
 import logging
-from google import genai
+import litellm
 from pydantic import BaseModel, Field
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-# Initialize Gemini
-client = None
+# Set Litellm API keys
 if settings.gemini_api_key:
-    client = genai.Client(api_key=settings.gemini_api_key)
+    litellm.api_key = settings.gemini_api_key
+if settings.openai_api_key:
+    litellm.openai_key = settings.openai_api_key
+if settings.anthropic_api_key:
+    litellm.anthropic_key = settings.anthropic_api_key
+
+def get_model_name():
+    provider = settings.default_llm_provider
+    if provider == "openai":
+        return "gpt-4o"
+    elif provider == "anthropic":
+        return "claude-3-5-sonnet-20240620"
+    else:
+        return "gemini/gemini-1.5-pro"
 
 class ReviewCommentModel(BaseModel):
     line_number: int = Field(description="The exact line number in the NEW file where the issue occurs.")
     body: str = Field(description="The review comment.")
+    suggestion: str | None = Field(default=None, description="The exact fixed code replacement for the issue, formatted properly.")
 
 class ReviewResponseModel(BaseModel):
     comments: list[ReviewCommentModel] = Field(description="List of review comments.")
 
-def analyze_code_changes(file_path: str, patch: str) -> list[dict]:
-    """
-    Analyzes a git patch using Google Gemini and returns a list of comments.
-    """
-    if not client or not patch:
+def generate_json_response(prompt: str, schema_class) -> dict | None:
+    try:
+        response = litellm.completion(
+            model=get_model_name(),
+            messages=[{"role": "user", "content": prompt}],
+            response_format=schema_class,
+            temperature=0.2
+        )
+        return json.loads(response.choices[0].message.content)
+    except Exception as e:
+        logger.error(f"Error calling LLM: {e}")
+        return None
+
+def analyze_code_changes(file_path: str, patch: str, custom_rules: str = "", full_file_context: str = "") -> list[dict]:
+    """Analyzes a git patch and returns comments with optional suggestions."""
+    if not patch:
         return []
+
+    context_str = f"Full File Context:\n```\n{full_file_context}\n```\n" if full_file_context else ""
+    rules_str = f"Custom Rules to Enforce:\n{custom_rules}\n" if custom_rules else ""
 
     prompt = f"""You are an expert software engineer performing a code review.
 Analyze the following code changes for the file `{file_path}` and provide constructive, actionable feedback.
 Focus on bugs, security vulnerabilities, code smells, and performance bottlenecks.
 
-If there are no issues, return an empty list of comments.
+If you find an issue, optionally provide a direct code fix in the `suggestion` field. The suggestion should contain EXACTLY the replacement code without markdown codeblocks or extra text. It will be wrapped in GitHub's ```suggestion tag by the system.
+
+{rules_str}
+{context_str}
 
 File: {file_path}
 Patch:
@@ -37,18 +67,77 @@ Patch:
 {patch}
 ```
 """
+    result = generate_json_response(prompt, ReviewResponseModel)
+    if result and "comments" in result:
+        return result["comments"]
+    return []
+
+def generate_pr_summary(title: str, description: str, all_patches: str) -> str:
+    """Generates a high-level summary of the PR."""
+    prompt = f"""You are an expert software engineer. Review the following Pull Request details and code changes.
+Generate a high-level PR Summary and Release Notes. Include "What Changed", "Why it Matters", and "Potential Impact".
+
+PR Title: {title}
+PR Description: {description}
+
+Patches:
+```diff
+{all_patches}
+```
+"""
     try:
-        response = client.models.generate_content(
-            model='gemini-1.5-pro',
-            contents=prompt,
-            config={
-                'response_mime_type': 'application/json',
-                'response_schema': ReviewResponseModel,
-            },
+        response = litellm.completion(
+            model=get_model_name(),
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3
         )
-        
-        result = json.loads(response.text)
-        return result.get("comments", [])
+        return response.choices[0].message.content
     except Exception as e:
-        logger.error(f"Error generating review for {file_path}: {e}")
-        return []
+        logger.error(f"Error generating PR summary: {e}")
+        return "Could not generate PR summary."
+
+def answer_question(comment_context: str, patch_context: str) -> str:
+    """Answers a developer's question from a PR comment thread."""
+    prompt = f"""You are an AI Code Review Assistant. A developer has replied to one of your comments or mentioned you in a PR.
+Read the conversation history and the relevant code context, and provide a helpful, polite, and technical response.
+
+Code Context:
+```diff
+{patch_context}
+```
+
+Conversation History:
+{comment_context}
+
+Respond directly to the developer.
+"""
+    try:
+        response = litellm.completion(
+            model=get_model_name(),
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.4
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        logger.error(f"Error answering question: {e}")
+        return "I'm sorry, I encountered an error while trying to process your request."
+
+def generate_tests(file_path: str, patch: str) -> str:
+    """Generates unit tests for the modified code."""
+    prompt = f"""You are an expert software engineer. Based on the following code changes in `{file_path}`, generate relevant unit tests to verify the new logic. Provide the complete test code.
+
+Patch:
+```diff
+{patch}
+```
+"""
+    try:
+        response = litellm.completion(
+            model=get_model_name(),
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        logger.error(f"Error generating tests: {e}")
+        return "Could not generate tests."
