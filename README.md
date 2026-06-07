@@ -82,18 +82,25 @@ docker build -t ai-code-reviewer .
 docker run -p 8000:8000 --env-file .env ai-code-reviewer
 ```
 
-### 5. Deploy to a Free Cloud (Render) - Recommended!
-Running locally requires `ngrok` and keeping your PC awake. Deploying to a free cloud service like Render is much easier.
+### 5. Deploy to a Free Cloud (Hugging Face Spaces) - No Credit Card Required!
+Running locally requires keeping your PC awake. Deploying to Hugging Face Spaces is 100% free and doesn't require a credit card.
 
-1. Create a free account at [Render.com](https://render.com/).
-2. Click **New +** and select **Blueprint**.
-3. Connect your GitHub account and select this repository.
-4. Render will automatically detect the `render.yaml` file and set up the server.
-5. In your Render Dashboard, go to your new Web Service's **Environment** tab and add your API keys (`GEMINI_API_KEY`, `GITHUB_APP_ID`, `GITHUB_PRIVATE_KEY` (copy the full content of the .pem file), etc.).
-6. Copy your new Render URL (e.g., `https://ai-code-reviewer.onrender.com`).
-7. Update your GitHub App Settings so the Webhook URL points to `https://your-render-url.onrender.com/api/v1/webhook`.
+1. Create a free account at [HuggingFace.co](https://huggingface.co/).
+2. Go to your profile and click **New Space**.
+3. Give your Space a name (e.g., `ai-code-reviewer`).
+4. **Important**: For the Space SDK, choose **Docker**, then select **Blank**.
+5. Set Space Hardware to the free "CPU basic". Click **Create Space**.
+6. Follow their instructions to push your repository to the Space, or simply upload your files via the UI.
+7. Go to your Space's **Settings -> Variables and secrets**.
+8. Under **Secrets**, add your API keys:
+   - `GEMINI_API_KEY`
+   - `GITHUB_APP_ID`
+   - `GITHUB_PRIVATE_KEY` (copy the full content of the `.pem` file)
+   - `GITHUB_WEBHOOK_SECRET`
+9. Once the Space builds and says "Running", click the **"Embed this Space"** (three dots menu at the top right) to find the Direct URL (it looks like `https://username-ai-code-reviewer.hf.space`).
+10. Update your GitHub App Settings so the Webhook URL points to: `https://username-ai-code-reviewer.hf.space/api/v1/webhook`.
 
-You're done! The agent will now run 24/7 in the cloud automatically.
+You're done! The agent will now run 24/7 for free.
 
 ---
 
