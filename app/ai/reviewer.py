@@ -21,7 +21,7 @@ def get_model_name():
     elif provider == "anthropic":
         return "claude-3-5-sonnet-20240620"
     else:
-        return "gemini/gemini-1.5-flash"
+        return "gemini/gemini-1.5-flash-latest"
 
 class ReviewCommentModel(BaseModel):
     line_number: int = Field(description="The exact line number in the NEW file where the issue occurs.")
