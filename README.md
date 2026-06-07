@@ -82,9 +82,22 @@ docker build -t ai-code-reviewer .
 docker run -p 8000:8000 --env-file .env ai-code-reviewer
 ```
 
+### 5. Deploy to a Free Cloud (Render) - Recommended!
+Running locally requires `ngrok` and keeping your PC awake. Deploying to a free cloud service like Render is much easier.
+
+1. Create a free account at [Render.com](https://render.com/).
+2. Click **New +** and select **Blueprint**.
+3. Connect your GitHub account and select this repository.
+4. Render will automatically detect the `render.yaml` file and set up the server.
+5. In your Render Dashboard, go to your new Web Service's **Environment** tab and add your API keys (`GEMINI_API_KEY`, `GITHUB_APP_ID`, `GITHUB_PRIVATE_KEY` (copy the full content of the .pem file), etc.).
+6. Copy your new Render URL (e.g., `https://ai-code-reviewer.onrender.com`).
+7. Update your GitHub App Settings so the Webhook URL points to `https://your-render-url.onrender.com/api/v1/webhook`.
+
+You're done! The agent will now run 24/7 in the cloud automatically.
+
 ---
 
-## 🔗 Connecting to GitHub (Local Testing)
+## 🔗 Connecting to GitHub (Local Testing Only)
 
 Since your local server runs on `localhost:8000`, GitHub cannot send webhooks directly to it. You need to expose it using a tunneling tool like **ngrok**.
 
